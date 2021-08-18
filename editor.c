@@ -10,7 +10,7 @@ extern textbuf TEXTBUF;
 
 /*** FILE IO ***/
 // Change to open() syscall
-void editorOpen(const char *filename) {
+void editor_open(const char *filename) {
   FILE *fp = fopen(filename, "ab+");
   if (!fp) {
     char errorMessage[100];
@@ -19,16 +19,16 @@ void editorOpen(const char *filename) {
     die(errorMessage);
   }
 
-  textbufRead(&TEXTBUF, fp); // All lines of the file are read into TEXTBUF
+  text_buf_read(&TEXTBUF, fp); // All lines of the file are read into TEXTBUF
   fclose(fp);
 	if (TEXTBUF.size==0){
-		textbufInitForEmptyFile(&TEXTBUF);
+		text_buf_init_for_empty_file(&TEXTBUF);
 	}
 }
 
 /*** Input ***/
 /// Reads and returns the key once.
-int editorReadKey(void) {
+int editor_read_key(void) {
 	char c;
 	int nread = read(STDIN_FILENO, &c, 1);
 	// read returns '\0' if no input is received after 0.1 s
@@ -97,26 +97,26 @@ int editorReadKey(void) {
 	else return '\x1b';
 }
 
-int editorProcessKeyPress(void) {
+int editor_process_key_press(void) {
   unsigned int c = KEY.key[0];
-  const unsigned int textbufXPos = editorGetCursorTextbufPosX();
-  const unsigned int textbufYPos = editorGetCursorTextbufPosY();
+  const unsigned int textbufXPos = editor_get_cursor_text_buf_pos_x();
+  const unsigned int textbufYPos = editor_get_cursor_text_buf_pos_y();
   switch (c){
     case '\0':
       break;
     case CTRL_KEY('s'):
-      editorSaveFile(E.fileName.b);
+      editor_save_file(E.fileName.b);
       break;
     case CTRL_KEY('q'):
-      clearScreen();
+      clear_screen();
       PU.running = 0;
       break;
     case 13:  // Enter key, or ctrl('m')
-      textbufEnter(&TEXTBUF, textbufXPos, textbufYPos);
+      text_buf_enter(&TEXTBUF, textbufXPos, textbufYPos);
       E.cursorTextbufPosX = 0;
       // Scroll down when enter is used in last line of the screen
       // TODO: REFACTOR 
-      editorMoveCursor(KEY_ARROW_DOWN);
+      editor_move_cursor(KEY_ARROW_DOWN);
       break;
     case KEY_ARROW_LEFT:
     case KEY_ARROW_RIGHT:
@@ -127,12 +127,12 @@ int editorProcessKeyPress(void) {
     case KEY_PAGE_UP:
     case KEY_PAGE_DOWN:
       for (unsigned int i = 0; i < E.screenrows; i++)
-        editorMoveCursor(c);
+        editor_move_cursor(c);
       break;
     case KEY_DELETE: {
       const unsigned int len = strlen(TEXTBUF.linebuf[textbufYPos]);
       if ((textbufXPos) < len)
-        textbufDeleteChar(&TEXTBUF, textbufXPos, textbufYPos);
+        text_buf_delete_char(&TEXTBUF, textbufXPos, textbufYPos);
       break;
     }
     case KEY_HOME:
@@ -140,10 +140,10 @@ int editorProcessKeyPress(void) {
       break;
     case 127:  // Backspace
       if (textbufXPos > 0){
-        textbufDeleteChar(&TEXTBUF, textbufXPos - 1, textbufYPos);
-        editorMoveCursor(KEY_ARROW_LEFT);
+        text_buf_delete_char(&TEXTBUF, textbufXPos - 1, textbufYPos);
+        editor_move_cursor(KEY_ARROW_LEFT);
       } else if (textbufYPos > 0 && textbufXPos<TEXTBUF.size){
-        textbufDeleteLineBreak(&TEXTBUF, textbufYPos);
+        text_buf_delete_line_break(&TEXTBUF, textbufYPos);
       }
     case 27:  // escape
       break;
@@ -153,15 +153,15 @@ int editorProcessKeyPress(void) {
         break;
         // special characters are defined to be greater than 1000
       else if (c < 1000){ 
-        textbufInputChar(&TEXTBUF, c, textbufXPos, textbufYPos);
-        editorMoveCursor(KEY_ARROW_RIGHT);
+        text_buf_input_char(&TEXTBUF, c, textbufXPos, textbufYPos);
+        editor_move_cursor(KEY_ARROW_RIGHT);
       }
       break;
   }
   return 1;
 }
 
-void editorSaveFile(char *ptr){
+void editor_save_file(char *ptr){
 	// 0644 is octal, equivalent to 110100100 in binary
 	// Owner can read and write, all other can only read.
 	int fd = open(ptr, O_CREAT | O_WRONLY | O_TRUNC, 0644);	
@@ -181,7 +181,7 @@ void editorSaveFile(char *ptr){
 	return;
 }
 
-static int appendWelcomeMessage(struct abuf *ptr) {
+static int append_welcome_message(struct abuf *ptr) {
   struct abuf *abptr = ptr;
   char welcome[80];
   // KILO_VERSION defined in main.c
@@ -195,32 +195,32 @@ static int appendWelcomeMessage(struct abuf *ptr) {
   // Center the Message
   unsigned int padding = (E.screencols - welcomelen) / 2;
   if (padding) {
-    abAppend(abptr, "~", 1);
+    ab_append(abptr, "~", 1);
     padding--;
   }
   while (padding--)
-    abAppend(abptr, " ", 1);
+    ab_append(abptr, " ", 1);
 
-  abAppend(abptr, welcome, welcomelen);
+  ab_append(abptr, welcome, welcomelen);
 
   return 1;
 }
 
-void screenBufferAppendDebugInformation(struct abuf *abptr){
+void screen_buffer_append_debug_information(struct abuf *abptr){
   const int buf_size = 100;
   char *buf = (char*)malloc(buf_size);
   snprintf(buf, buf_size, 
            "TexbufX: %d; TexbufY: %d; ScreenY: %d; rows: %d; cols: %d",
-            editorGetCursorTextbufPosX(), editorGetCursorTextbufPosY(),
-            editorGetCursorScreenPosY(),E.screenrows, E.screencols);
-  abAppend(DEB.debugString, buf, strlen(buf));  // Append message to the global struct
+            editor_get_cursor_text_buf_pos_x(), editor_get_cursor_text_buf_pos_y(),
+            editor_get_cursor_text_buf_pos_y(),E.screenrows, E.screencols);
+  ab_append(DEB.debugString, buf, strlen(buf));  // Append message to the global struct
   free(buf);
-  abAppend(abptr, DEB.debugString->b, DEB.debugString->len);	
-  abFree(DEB.debugString);
+  ab_append(abptr, DEB.debugString->b, DEB.debugString->len);	
+  ab_free(DEB.debugString);
 }
 
 /*** Output ***/
-void editorDrawRows(struct abuf *abptr) {
+void editor_draw_rows(struct abuf *abptr) {
   for (unsigned int nrows = 0; nrows < E.screenrows ; nrows++) {  // number of iteration is siginificant!
     // the line number of the row to be drawn
     const unsigned int n_rows_to_draw = nrows + E.offsety;
