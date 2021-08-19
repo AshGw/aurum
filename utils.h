@@ -9,22 +9,20 @@ void tracker(void);
 #include <string.h>
 #include <unistd.h>
 
-// append buffer: my custom mutable strings in C
 #ifndef ABUF_INIT
-#define ABUF_INIT                                                              \
-  { NULL, 0 }
+#define ABUF_INIT  { NULL, 0 }
 
 struct abuf {
   char *b;
   int len;
 };
 
-void abAppend(struct abuf *, const char *s, int len);
-void abFree(struct abuf *ab);
+void ab_append(struct abuf *, const char *s, int len);
+void ab_free(struct abuf *ab);
 #endif
 
 // Utilities functions
-void clearScreen(void);
+void clear_screen(void);
 
 #include <errno.h>
 void die(const char *);
@@ -53,7 +51,7 @@ size_t strnlen_s(const char *s, size_t maxlen);
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-ssize_t getline(char **restrict buffer, size_t *restrict size,
+ssize_t get_line(char **restrict buffer, size_t *restrict size,
                 FILE *restrict fp);
 #endif
 
