@@ -13,55 +13,55 @@ extern textbuf TEXTBUF;
 
 /*** init ***/
 void init(void) {
-  E.cursorTextbufPosX = 0;
-  E.cursorTextbufPosY = 0;
-  E.offsety = 0;
-  E.offsetx = 0;
+  E.cursor_textbuf_pos_x = 0;
+  E.cursor_textbuf_pos_y = 0;
+  E.offset_y = 0;
+  E.offset_x = 0;
 	E.mode = 1; // 1 insert mode
-  E.leftMarginSize = 3;
-  getWindowSize(&E.screenrows, &E.screencols); // from "terminal.h"
+  E.left_margin_size = 3;
+  get_window_size(&E.screenrows, &E.screencols); // from "terminal.h"
 	
-	programUtilsInit(&PU);
-	textbufInit(&TEXTBUF);
-	keyInit(&KEY);
-	debugUtilInit(&DEB);
+	program_utils_init(&PU);
+	textbuf_init(&TEXTBUF);
+	key_init(&KEY);
+	debug_util_init(&DEB);
 
-  enableRAWMode(); // from "terminal.h"; enable Terminal RAW mode
+  enable_raw_mode(); // from "terminal.h"; enable Terminal RAW mode
 }
 
 int main(int argc, char *argv[], char *envp[]) {
   // TODO: Refactor Initialisation and reading file
   init();
   if (argc > 1) {
-    editorOpen(argv[1]);
-    abAppend(&E.fileName, argv[1], strnlen_s(argv[1], 256)); 
+    editor_open(argv[1]);
+    ab_append(&E.file_name, argv[1], strnlen_s(argv[1], 256)); 
   } 
   if (argc <= 1) {
-    editorOpen("aaa.txt");
+    editor_open("aaa.txt");
   }
   // Margin Size depends on the textbuffer read.
-  editorSetMarginSize(&E, &TEXTBUF);
+  editor_set_margin_size(&E, &TEXTBUF);
   while (PU.running) { // PU is global struct, [P]rogram [U]tils
-    if (editorReadKey() == -1)
-      die("editorReadKey Failed");
+    if (editor_read_key() == -1)
+      die("editor_read_key Failed");
     if (PU.updated) {
       if (KEY.key[0]){
-        // Incase the margine size changes
-        editorSetMarginSize(&E, &TEXTBUF);
-        editorProcessKeyPress();
-        keyRefresh(&KEY);
+        // Incase the margin size changes
+        editor_set_margin_size(&E, &TEXTBUF);
+        editor_process_key_press();
+        key_refresh(&KEY);
       }
-      editorRefreshScreen();
+      editor_refresh_screen();
       PU.updated = 0;
     }
   }
 
   if (argc > 1) {
-    editorSaveFile(argv[1]);
+    editor_save_file(argv[1]);
   } 
 	if (argc <= 1) {
-		editorSaveFile("savedTo.txt");
+		editor_save_file("savedTo.txt");
 	}
-	clearScreen();
+	clear_screen();
   return 0;
 } 

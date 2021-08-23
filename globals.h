@@ -2,7 +2,7 @@
 #define GLOBALS_H 1
 
 #ifndef CTRL_KEY
-#define CTRL_KEY(k) ((k)&0x1f)
+#define CTRL_KEY(k) ((k) & 0x1f)
 #endif
 
 #define KILO_VERSION_MAJOR 0
@@ -54,64 +54,65 @@ typedef struct textbuf {
   // TODO: Change size to numlines
   unsigned int size; // Total number of lines
   char **linebuf;    // A pointer storing pointer to line buffer
-  int *lineLength;  // lineLength[n] = strlen(linebuf[n])
-} textbuf;           // textbuffer holding all lines.
-
+  int *line_length;  // line_length[n] = strlen(linebuf[n])
+} textbuf;           // text_buffer holding all lines.
 
 #include <stddef.h>
-void textbufInit(textbuf *);
-unsigned int textbufGetNthLineLength(textbuf *, int);
+
+void textbuf_init(textbuf *);
+unsigned int textbuf_get_nth_line_length(textbuf *, int);
 
 #include <stdio.h>
-int textbufRead(textbuf *, FILE *);
 
-int textbufInitForEmptyFile(textbuf *);
-void textbufInputChar(textbuf *, char, int, int);
-void textbufDeleteChar(textbuf *, int, int);
-void textbufEnter(textbuf *, unsigned int, unsigned int);
-int textbufDeleteLine(textbuf *, unsigned int);
-int textbufDeleteLineBreak(textbuf *, unsigned int);
+int textbuf_read(textbuf *, FILE *);
 
-struct editorConfig {
-  unsigned int cx, cy;     // cursor position. cx horizantol, cy vertical
-  // unsigned int cspx, cspy; // cursor screen position. cx horizantol, cy vertical
-  // TODO: set cursorTextbufPosX, cursorTextbufPosY to be int; they are not unsigned int
-  unsigned int cursorTextbufPosX, cursorTextbufPosY; // Cursor textbuf position
-  unsigned int screenrows; // number of rows that fit in the screen
-  unsigned int screencols; // number of columns that fit in the screen
-  unsigned int offsetx;    // Display offset, x direction
-  unsigned int offsety;
+int textbuf_init_for_empty_file(textbuf *);
+void textbuf_input_char(textbuf *, char, int, int);
+void textbuf_delete_char(textbuf *, int, int);
+void textbuf_enter(textbuf *, unsigned int, unsigned int);
+int textbuf_delete_line(textbuf *, unsigned int);
+int textbuf_delete_line_break(textbuf *, unsigned int);
+
+struct editor_config {
+  unsigned int cx, cy;     // cursor position. cx horizontal, cy vertical
+  // unsigned int cspx, cspy; // cursor screen position. cx horizontal, cy vertical
+  // TODO: set cursor_textbuf_pos_x, cursor_textbuf_pos_y to be int; they are not unsigned int
+  unsigned int cursor_textbuf_pos_x, cursor_textbuf_pos_y; // Cursor textbuf position
+  unsigned int screen_rows; // number of rows that fit in the screen
+  unsigned int screen_cols; // number of columns that fit in the screen
+  unsigned int offset_x;    // Display offset, x direction
+  unsigned int offset_y;
   unsigned int mode; // Indicator for mode
-  unsigned int leftMarginSize;
-  struct abuf fileName;
+  unsigned int left_margin_size;
+  struct abuf file_name;
   struct termios orig_termios;
 };
 
-struct programUtils {
+struct program_utils {
   unsigned int running;
   unsigned int updated;
 };
 
-void programUtilsInit(struct programUtils *);
+void program_utils_init(struct program_utils *);
 
-///  The key struct can hold upto 8 keys
+///  The key struct can hold up to 8 keys
 ///  If the key value is smaller
 /// than 1000, it represents the key corresponding to the ASCII code
-/// key value of 1000 - 2000 representes escaped key
+/// key value of 1000 - 2000 represents escaped key
 /// note 'ctrl(a)' = 'a' - 96 = 1
 struct key {
   unsigned int key[8];
 };
 
-int keyInit(struct key *);
-int keyRefresh(struct key *);
+int key_init(struct key *);
+int key_refresh(struct key *);
 
-struct debugUtil{
-	struct abuf *debugString;
+struct debug_util {
+  struct abuf *debug_string;
 };
 
-int debugUtilInit(struct debugUtil*);
-// The string must be null terminated 
-int debugAddMessage(struct debugUtil*, const char*); 
+int debug_util_init(struct debug_util *);
+// The string must be null terminated
+int debug_add_message(struct debug_util *, const char *);
 
 #endif // for GLOBALS_H

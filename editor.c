@@ -19,10 +19,10 @@ void editor_open(const char *filename) {
     die(errorMessage);
   }
 
-  text_buf_read(&TEXTBUF, fp); // All lines of the file are read into TEXTBUF
+  textbuf_read(&TEXTBUF, fp); // All lines of the file are read into TEXTBUF
   fclose(fp);
 	if (TEXTBUF.size==0){
-		text_buf_init_for_empty_file(&TEXTBUF);
+		textbuf_init_for_empty_file(&TEXTBUF);
 	}
 }
 
@@ -99,8 +99,8 @@ int editor_read_key(void) {
 
 int editor_process_key_press(void) {
   unsigned int c = KEY.key[0];
-  const unsigned int textbufXPos = editor_get_cursor_text_buf_pos_x();
-  const unsigned int textbufYPos = editor_get_cursor_text_buf_pos_y();
+  const unsigned int textbufXPos = editor_get_cursor_textbuf_pos_x();
+  const unsigned int textbufYPos = editor_get_cursor_textbuf_pos_y();
   switch (c){
     case '\0':
       break;
@@ -112,7 +112,7 @@ int editor_process_key_press(void) {
       PU.running = 0;
       break;
     case 13:  // Enter key, or ctrl('m')
-      text_buf_enter(&TEXTBUF, textbufXPos, textbufYPos);
+      textbuf_enter(&TEXTBUF, textbufXPos, textbufYPos);
       E.cursorTextbufPosX = 0;
       // Scroll down when enter is used in last line of the screen
       // TODO: REFACTOR 
@@ -122,7 +122,7 @@ int editor_process_key_press(void) {
     case KEY_ARROW_RIGHT:
     case KEY_ARROW_DOWN:
     case KEY_ARROW_UP:
-      editorMoveCursor(c);
+      editor_move_cursor(c);
       break;
     case KEY_PAGE_UP:
     case KEY_PAGE_DOWN:
@@ -132,7 +132,7 @@ int editor_process_key_press(void) {
     case KEY_DELETE: {
       const unsigned int len = strlen(TEXTBUF.linebuf[textbufYPos]);
       if ((textbufXPos) < len)
-        text_buf_delete_char(&TEXTBUF, textbufXPos, textbufYPos);
+        textbuf_delete_char(&TEXTBUF, textbufXPos, textbufYPos);
       break;
     }
     case KEY_HOME:
@@ -140,10 +140,10 @@ int editor_process_key_press(void) {
       break;
     case 127:  // Backspace
       if (textbufXPos > 0){
-        text_buf_delete_char(&TEXTBUF, textbufXPos - 1, textbufYPos);
+        textbuf_delete_char(&TEXTBUF, textbufXPos - 1, textbufYPos);
         editor_move_cursor(KEY_ARROW_LEFT);
       } else if (textbufYPos > 0 && textbufXPos<TEXTBUF.size){
-        text_buf_delete_line_break(&TEXTBUF, textbufYPos);
+        textbuf_delete_line_break(&TEXTBUF, textbufYPos);
       }
     case 27:  // escape
       break;
@@ -153,7 +153,7 @@ int editor_process_key_press(void) {
         break;
         // special characters are defined to be greater than 1000
       else if (c < 1000){ 
-        text_buf_input_char(&TEXTBUF, c, textbufXPos, textbufYPos);
+        textbuf_input_char(&TEXTBUF, c, textbufXPos, textbufYPos);
         editor_move_cursor(KEY_ARROW_RIGHT);
       }
       break;
@@ -211,8 +211,8 @@ void screen_buffer_append_debug_information(struct abuf *abptr){
   char *buf = (char*)malloc(buf_size);
   snprintf(buf, buf_size, 
            "TexbufX: %d; TexbufY: %d; ScreenY: %d; rows: %d; cols: %d",
-            editor_get_cursor_text_buf_pos_x(), editor_get_cursor_text_buf_pos_y(),
-            editor_get_cursor_text_buf_pos_y(),E.screenrows, E.screencols);
+            editor_get_cursor_textbuf_pos_x(), editor_get_cursor_textbuf_pos_y(),
+            editor_get_cursor_textbuf_pos_y(),E.screenrows, E.screencols);
   ab_append(DEB.debugString, buf, strlen(buf));  // Append message to the global struct
   free(buf);
   ab_append(abptr, DEB.debugString->b, DEB.debugString->len);	
@@ -228,8 +228,8 @@ void editor_draw_rows(struct abuf *abptr) {
     // Create left margin (line number)
     char *leftMargin = (char *)calloc(E.leftMarginSize, 1);
     int lineNumber;
-    if (nrows ==  editorGetCursorScreenPosY()){
-      lineNumber = editorGetCursorTextbufPosY() + 1; // linenumber counts from 1
+    if (nrows ==  editor_get_cursor_screen_pos_y()){
+      lineNumber = editor_get_cursor_textbuf_pos_y() + 1; // linenumber counts from 1
       snprintf(leftMargin, E.leftMarginSize, "%d", lineNumber);
       // As in vim, the line number in the current line is aliged to right
       // Create necessary paddings
@@ -237,16 +237,16 @@ void editor_draw_rows(struct abuf *abptr) {
         // recall E.leftMarginSize is seted to 1 more than the maximum 
         // line number to include the extra space
         for (size_t i = 0; i < E.leftMarginSize-strlen(leftMargin)-1; i++){
-          abAppend(abptr, " ", 1);
+          ab_append(abptr, " ", 1);
         }
       }
-      abAppend(abptr, "\x1b[1m", 4);
-      abAppend(abptr, leftMargin, strnlen_s(leftMargin, 256));
-      abAppend(abptr, "\x1b[0m", 4);
+      ab_append(abptr, "\x1b[1m", 4);
+      ab_append(abptr, leftMargin, strnlen_s(leftMargin, 256));
+      ab_append(abptr, "\x1b[0m", 4);
       // the extra space
-      abAppend(abptr, " ", 1);
+      ab_append(abptr, " ", 1);
     } else {
-      const int temp = nrows - editorGetCursorScreenPosY();
+      const int temp = nrows - editor_get_cursor_screen_pos_y();
       lineNumber = temp > 0 ? temp : -temp; 
       // Only display relative number for lines displayed by textbuf
       if ((nrows+ E.offsety) < TEXTBUF.size){
@@ -255,14 +255,14 @@ void editor_draw_rows(struct abuf *abptr) {
       else {
         snprintf(leftMargin, E.leftMarginSize, "~");
       }
-      abAppend(abptr, leftMargin, strnlen_s(leftMargin, 256));
+      ab_append(abptr, leftMargin, strnlen_s(leftMargin, 256));
       // Create necessary paddings
       // recall E.leftMarginSize is seted to 1 more than the maximum 
       for (size_t i = 0; i < E.leftMarginSize-strlen(leftMargin)-1; i++){
-        abAppend(abptr, " ", 1);
+        ab_append(abptr, " ", 1);
       }
       // The extra space 
-      abAppend(abptr, " ", 1);
+      ab_append(abptr, " ", 1);
     }
 
     if (n_rows_to_draw >= TEXTBUF.size) {
@@ -282,88 +282,88 @@ void editor_draw_rows(struct abuf *abptr) {
       unsigned int bufferlen = stringlen - xoffset; // same as strlen(temp)
       bufferlen = (bufferlen >= E.screencols - E.leftMarginSize) ? 
         E.screencols - E.leftMarginSize : bufferlen;
-      // abAppend(abptr, " ", 1);  // The space before the Line.
-      abAppend(abptr, temp, bufferlen);
+      // ab_append(abptr, " ", 1);  // The space before the Line.
+      ab_append(abptr, temp, bufferlen);
     }
-		if (nrows<E.screenrows - 1) abAppend(abptr, "\r\n", 2);
+		if (nrows<E.screenrows - 1) ab_append(abptr, "\r\n", 2);
   }
 }
 
-void editorRefreshScreen(void) {
+void editor_refresh_screen(void) {
   // init append buffer
   struct abuf ab = ABUF_INIT;
 
-  abAppend(&ab, "\x1b[?25l", 6); // Hide cursor
+  ab_append(&ab, "\x1b[?25l", 6); // Hide cursor
 
-  editorDrawRows(&ab);
+  editor_draw_rows(&ab);
 
   // Move mouse to correct position
   char buf[32];
 	// move cursor, row:cols; top left is 1:1
-  const unsigned int CursorScreenX = editorGetCursorScreenPosX();
-  const unsigned int CursorScreenY = editorGetCursorScreenPosY();
+  const unsigned int CursorScreenX = editor_get_cursor_screen_pos_x();
+  const unsigned int CursorScreenY = editor_get_cursor_screen_pos_y();
   snprintf(buf, sizeof(buf), "\x1b[%d;%dH", CursorScreenY + 1, CursorScreenX + 1); 
-  // abAppend(&ab, "\x1b[H", 3); 
-  abAppend(&ab, buf, strlen(buf)); // To corrected position
+  // ab_append(&ab, "\x1b[H", 3); 
+  ab_append(&ab, buf, strlen(buf)); // To corrected position
 
-  abAppend(&ab, "\x1b[?25h", 6); // Show cursor
+  ab_append(&ab, "\x1b[?25h", 6); // Show cursor
   write(STDIN_FILENO, "\x1b[2J\x1b[H", 7);  // erase entire screen
   write(STDIN_FILENO, ab.b, ab.len);
-  abFree(&ab);
+  ab_free(&ab);
 }
 
-void editorScrollDown(void) {
+void editor_scroll_down(void) {
     E.offsety++;
 }
 
-void editorScrollUp(void) {
+void editor_scroll_up(void) {
   	E.offsety--;
 }
 
-void editorScrollLeft(void) {
+void editor_scroll_left(void) {
   E.offsetx--;
 }
 
-void editorScrollRight(void) {
+void editor_scroll_right(void) {
   E.offsetx++;
 }
 
-void editorCursorXToTextbufPos(unsigned int x){
+void editor_cursor_x_to_textbuf_pos(unsigned int x){
 	E.cursorTextbufPosX = x;
 }
 
-void editorCursorYToTextbufPos(unsigned int y){
+void editor_cursor_y_to_textbuf_pos(unsigned int y){
 	E.cursorTextbufPosY = y;
 }
 
-void editorMoveCursorToEndOfLine(textbuf * txb, unsigned int y){
+void editor_move_cursor_to_end_of_line(textbuf * txb, unsigned int y){
   // input, textbuf, line number
-  editorCursorXToTextbufPos(
-    textbufGetNthLineLength(txb, y));
+  editor_cursor_x_to_textbuf_pos(
+    textbuf_get_nth_line_length(txb, y));
   return;
 }
 
-void editorConfineCursorPosition(textbuf *txb, int xPos, int yPos){
+void editor_confine_cursor_position(textbuf *txb, int xPos, int yPos){
   if (xPos<0)
-    editorCursorXToTextbufPos(0);
+    editor_cursor_x_to_textbuf_pos(0);
 
-  int lineLength = textbufGetNthLineLength(txb, yPos);
+  int lineLength = textbuf_get_nth_line_length(txb, yPos);
   if (xPos >= lineLength){
-    editorCursorXToTextbufPos(lineLength);
+    editor_cursor_x_to_textbuf_pos(lineLength);
   }
   if (yPos<0)
-    editorCursorYToTextbufPos(0);
+    editor_cursor_y_to_textbuf_pos(0);
   if (yPos>(txb->size))
-    editorCursorYToTextbufPos(txb->size);
+    editor_cursor_y_to_textbuf_pos(txb->size);
 }
 
 // TODO: LEFT/WRITE ARROW MECHANISM
-int editorMoveCursor(int key) {
+int editor_move_cursor(int key) {
   switch (key) {
   case KEY_ARROW_UP: 
   case KEY_PAGE_UP:
     if (E.cursorTextbufPosY > 0) {
-      if (editorGetCursorScreenPosY() <= 0) --E.offsety;
+      if (editor_get_cursor_screen_pos_y() <= 0) --E.offsety;
       E.cursorTextbufPosY--;
     }
     break;
@@ -371,7 +371,7 @@ int editorMoveCursor(int key) {
   case KEY_PAGE_DOWN:
     if (E.cursorTextbufPosY < TEXTBUF.size - 1){
       // screenPos counts from 0, screen rows counts from 1
-      if (editorGetCursorScreenPosY() >= E.screenrows-1) ++E.offsety;
+      if (editor_get_cursor_screen_pos_y() >= E.screenrows-1) ++E.offsety;
       E.cursorTextbufPosY++;
     }
     break;
@@ -381,9 +381,9 @@ int editorMoveCursor(int key) {
       E.cursorTextbufPosX--;
     break;
   case KEY_ARROW_RIGHT: 
-    if (editorCursorMovableToRight(&TEXTBUF,
-        editorGetCursorTextbufPosX(),
-        editorGetCursorTextbufPosY())
+    if (editor_cursor_movable_to_right(&TEXTBUF,
+        editor_get_cursor_textbuf_pos_x(),
+        editor_get_cursor_textbuf_pos_y())
       )
       E.cursorTextbufPosX++;
     break;
@@ -393,16 +393,16 @@ int editorMoveCursor(int key) {
 
   // Move the cursor back to valid location
   // A valid location is a location in range of the textbuffer
-  editorConfineCursorPosition(&TEXTBUF,
-                              editorGetCursorTextbufPosX(),
-                              editorGetCursorTextbufPosY());
+  editor_confine_cursor_position(&TEXTBUF,
+                              editor_get_cursor_textbuf_pos_x(),
+                              editor_get_cursor_textbuf_pos_y());
   return 0;
 }
 
 // Set editorConfig.leftMarginSize according to 
 // the digits of the maxium line number stored in textbuf
 // The minimum size of leftMarginSize is 4
-void editorSetMarginSize(struct editorConfig *ptr,textbuf *ptrtb){
+void editor_set_margin_size(struct editorConfig *ptr,textbuf *ptrtb){
   int NumberOflines = ptrtb->size; 
   int counter;
   // Find out the digits of greatest linenumber
@@ -415,25 +415,25 @@ void editorSetMarginSize(struct editorConfig *ptr,textbuf *ptrtb){
 }
 
 
-int editorGetCursorScreenPosX(void){
+int editor_get_cursor_screen_pos_x(void){
   return E.cursorTextbufPosX + E.leftMarginSize - E.offsetx; 
 }
 
-int editorGetCursorScreenPosY(void){
+int editor_get_cursor_screen_pos_y(void){
   return E.cursorTextbufPosY - E.offsety;
 }
 
-int editorGetCursorTextbufPosX(void){
+int editor_get_cursor_textbuf_pos_x(void){
   return E.cursorTextbufPosX;
 }
 
-int editorGetCursorTextbufPosY(void){
+int editor_get_cursor_textbuf_pos_y(void){
   return E.cursorTextbufPosY;
 }
 
 // See if the cursor can be moved further to write 
 // with current cursro textbuf postion and textbuffer 
-int editorCursorMovableToRight(
+int editor_cursor_movable_to_right(
   textbuf * txb, unsigned int cursorTxbPosX, unsigned int cursorTxbPosY){
-  return textbufGetNthLineLength(txb, cursorTxbPosY) >= cursorTxbPosX + 1; 
+  return textbuf_get_nth_line_length(txb, cursorTxbPosY) >= cursorTxbPosX + 1; 
 }
