@@ -152,12 +152,12 @@ int key_refresh(struct key *K) {
   return 0;
 }
 
-void program_utils_init(struct programUtils *p) {
+void program_utils_init(struct program_utils *p) {
   p->running = 1;
   p->updated = 1;
 }
 
-int debug_util_init(struct debugUtil *d) {
+int debug_util_init(struct debug_util *d) {
   d->debug_string = (struct abuf *)malloc(sizeof(struct abuf));
   d->debug_string->len = 0;
   d->debug_string->b = NULL;
@@ -166,7 +166,7 @@ int debug_util_init(struct debugUtil *d) {
 
 /// The string must be null terminated
 // replace strlen if possible
-int debug_add_message(struct debugUtil *d, const char *string) {
+int debug_add_message(struct debug_util *d, const char *string) {
   abAppend(d->debug_string, string, strnlen_s(string, 256));
   return 1;
 }

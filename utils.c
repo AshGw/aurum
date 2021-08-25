@@ -69,7 +69,7 @@ void ab_free(struct abuf *ab) {
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-ssize_t get_line(char **restrict buffer, size_t *restrict size,
+ssize_t getline(char **restrict buffer, size_t *restrict size,
                 FILE *restrict fp) {
   register int c;
   register char *cs = NULL;
