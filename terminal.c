@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "globals.h"
 
-extern struct editorConfig E;
+extern struct editor_config E;
 
 /// This function is merely an auxiliary function for get_window_size()
 int get_cursor_position(unsigned int *rows, unsigned int *cols) {

@@ -15,7 +15,7 @@ void editor_open(const char *);
 int editor_move_cursor(int);
 void editor_cursor_x_to_textbuf_pos(unsigned int);
 void editor_cursor_y_to_textbuf_pos(unsigned int);
-void editor_set_margin_size(struct editorConfig *, textbuf *);
+void editor_set_margin_size(struct editor_config *, textbuf *);
 
 void editor_scroll_down(void);
 

@@ -1,9 +1,9 @@
 // #include <pthread.h>
 
+#include "editor.h"
 #include "globals.h"
 #include "terminal.h"
 #include "utils.h"
-#include "editor.h"
 
 extern struct editorConfig E;
 extern struct programUtils PU;
@@ -17,14 +17,14 @@ void init(void) {
   E.cursor_textbuf_pos_y = 0;
   E.offset_y = 0;
   E.offset_x = 0;
-	E.mode = 1; // 1 insert mode
+  E.mode = 1; // 1 insert mode
   E.left_margin_size = 3;
   get_window_size(&E.screenrows, &E.screencols); // from "terminal.h"
-	
-	program_utils_init(&PU);
-	textbuf_init(&TEXTBUF);
-	key_init(&KEY);
-	debug_util_init(&DEB);
+
+  program_utils_init(&PU);
+  textbuf_init(&TEXTBUF);
+  key_init(&KEY);
+  debug_util_init(&DEB);
 
   enable_raw_mode(); // from "terminal.h"; enable Terminal RAW mode
 }
@@ -34,8 +34,8 @@ int main(int argc, char *argv[], char *envp[]) {
   init();
   if (argc > 1) {
     editor_open(argv[1]);
-    ab_append(&E.file_name, argv[1], strnlen_s(argv[1], 256)); 
-  } 
+    ab_append(&E.file_name, argv[1], strnlen_s(argv[1], 256));
+  }
   if (argc <= 1) {
     editor_open("aaa.txt");
   }
@@ -45,7 +45,7 @@ int main(int argc, char *argv[], char *envp[]) {
     if (editor_read_key() == -1)
       die("editor_read_key Failed");
     if (PU.updated) {
-      if (KEY.key[0]){
+      if (KEY.key[0]) {
         // Incase the margin size changes
         editor_set_margin_size(&E, &TEXTBUF);
         editor_process_key_press();
@@ -58,10 +58,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
   if (argc > 1) {
     editor_save_file(argv[1]);
-  } 
-	if (argc <= 1) {
-		editor_save_file("savedTo.txt");
-	}
-	clear_screen();
+  }
+  if (argc <= 1) {
+    editor_save_file("savedTo.txt");
+  }
+  clear_screen();
   return 0;
-} 
+}

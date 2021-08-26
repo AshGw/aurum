@@ -2,7 +2,7 @@
 #include "editor.h"
 #include "utils.h"
 
-struct editorConfig E;
+struct editor_config E;
 struct programUtils PU;
 struct key KEY;
 struct debugUtil DEB;

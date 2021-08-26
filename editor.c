@@ -2,10 +2,10 @@
 #include "globals.h"
 #include "editor.h"
 
-extern struct editorConfig E;
-extern struct programUtils PU;
+extern struct editor_config E;
+extern struct program_utils PU;
 extern struct key KEY;
-extern struct debugUtil DEB;
+extern struct debug_util DEB;
 extern textbuf TEXTBUF;
 
 /*** FILE IO ***/
@@ -105,7 +105,7 @@ int editor_process_key_press(void) {
     case '\0':
       break;
     case CTRL_KEY('s'):
-      editor_save_file(E.fileName.b);
+      editor_save_file(E.file_name.b);
       break;
     case CTRL_KEY('q'):
       clear_screen();
@@ -113,7 +113,7 @@ int editor_process_key_press(void) {
       break;
     case 13:  // Enter key, or ctrl('m')
       textbuf_enter(&TEXTBUF, textbufXPos, textbufYPos);
-      E.cursorTextbufPosX = 0;
+      E.cursor_textbuf_pos_x = 0;
       // Scroll down when enter is used in last line of the screen
       // TODO: REFACTOR 
       editor_move_cursor(KEY_ARROW_DOWN);
@@ -126,7 +126,7 @@ int editor_process_key_press(void) {
       break;
     case KEY_PAGE_UP:
     case KEY_PAGE_DOWN:
-      for (unsigned int i = 0; i < E.screenrows; i++)
+      for (unsigned int i = 0; i < E.screen_rows; i++)
         editor_move_cursor(c);
       break;
     case KEY_DELETE: {
@@ -189,11 +189,11 @@ static int append_welcome_message(struct abuf *ptr) {
   unsigned int welcomelen =
       snprintf(welcome, sizeof(welcome), "Kilo Editor -- Version %d.%d.%d",
                KILO_VERSION_MAJOR, KILO_VERSION_MINOR, KILO_VERSION_PATCH);
-  if (welcomelen > E.screencols)
-    welcomelen = E.screencols;
+  if (welcomelen > E.screen_cols)
+    welcomelen = E.screen_cols;
 
   // Center the Message
-  unsigned int padding = (E.screencols - welcomelen) / 2;
+  unsigned int padding = (E.screen_cols - welcomelen) / 2;
   if (padding) {
     ab_append(abptr, "~", 1);
     padding--;
@@ -212,31 +212,31 @@ void screen_buffer_append_debug_information(struct abuf *abptr){
   snprintf(buf, buf_size, 
            "TexbufX: %d; TexbufY: %d; ScreenY: %d; rows: %d; cols: %d",
             editor_get_cursor_textbuf_pos_x(), editor_get_cursor_textbuf_pos_y(),
-            editor_get_cursor_textbuf_pos_y(),E.screenrows, E.screencols);
-  ab_append(DEB.debugString, buf, strlen(buf));  // Append message to the global struct
+            editor_get_cursor_textbuf_pos_y(),E.screen_rows, E.screen_cols);
+  ab_append(DEB.debug_string, buf, strlen(buf));  // Append message to the global struct
   free(buf);
-  ab_append(abptr, DEB.debugString->b, DEB.debugString->len);	
-  ab_free(DEB.debugString);
+  ab_append(abptr, DEB.debug_string->b, DEB.debug_string->len);	
+  ab_free(DEB.debug_string);
 }
 
 /*** Output ***/
 void editor_draw_rows(struct abuf *abptr) {
-  for (unsigned int nrows = 0; nrows < E.screenrows ; nrows++) {  // number of iteration is siginificant!
+  for (unsigned int nrows = 0; nrows < E.screen_rows ; nrows++) {  // number of iteration is siginificant!
     // the line number of the row to be drawn
-    const unsigned int n_rows_to_draw = nrows + E.offsety;
+    const unsigned int n_rows_to_draw = nrows + E.offset_y;
 
     // Create left margin (line number)
-    char *leftMargin = (char *)calloc(E.leftMarginSize, 1);
+    char *leftMargin = (char *)calloc(E.left_margin_size, 1);
     int lineNumber;
     if (nrows ==  editor_get_cursor_screen_pos_y()){
       lineNumber = editor_get_cursor_textbuf_pos_y() + 1; // linenumber counts from 1
-      snprintf(leftMargin, E.leftMarginSize, "%d", lineNumber);
+      snprintf(leftMargin, E.left_margin_size, "%d", lineNumber);
       // As in vim, the line number in the current line is aliged to right
       // Create necessary paddings
-      if (strnlen_s(leftMargin, 256)<E.leftMarginSize){
+      if (strnlen_s(leftMargin, 256)<E.left_margin_size){
         // recall E.leftMarginSize is seted to 1 more than the maximum 
         // line number to include the extra space
-        for (size_t i = 0; i < E.leftMarginSize-strlen(leftMargin)-1; i++){
+        for (size_t i = 0; i < E.left_margin_size-strlen(leftMargin)-1; i++){
           ab_append(abptr, " ", 1);
         }
       }
@@ -249,16 +249,16 @@ void editor_draw_rows(struct abuf *abptr) {
       const int temp = nrows - editor_get_cursor_screen_pos_y();
       lineNumber = temp > 0 ? temp : -temp; 
       // Only display relative number for lines displayed by textbuf
-      if ((nrows+ E.offsety) < TEXTBUF.size){
-        snprintf(leftMargin, E.leftMarginSize, "%d", lineNumber);
+      if ((nrows+ E.offset_y) < TEXTBUF.size){
+        snprintf(leftMargin, E.left_margin_size, "%d", lineNumber);
       } 
       else {
-        snprintf(leftMargin, E.leftMarginSize, "~");
+        snprintf(leftMargin, E.left_margin_size, "~");
       }
       ab_append(abptr, leftMargin, strnlen_s(leftMargin, 256));
       // Create necessary paddings
       // recall E.leftMarginSize is seted to 1 more than the maximum 
-      for (size_t i = 0; i < E.leftMarginSize-strlen(leftMargin)-1; i++){
+      for (size_t i = 0; i < E.left_margin_size-strlen(leftMargin)-1; i++){
         ab_append(abptr, " ", 1);
       }
       // The extra space 
@@ -267,7 +267,7 @@ void editor_draw_rows(struct abuf *abptr) {
 
     if (n_rows_to_draw >= TEXTBUF.size) {
     }
-    else if (nrows == E.screenrows-1){ // For debugging purpose
+    else if (nrows == E.screen_rows -1){ // For debugging purpose
       // screenBufferAppendDebugInformation(abptr);
 		}
     else {
@@ -276,16 +276,16 @@ void editor_draw_rows(struct abuf *abptr) {
       char *temp = *(TEXTBUF.linebuf + n_rows_to_draw);
       const unsigned int stringlen = strlen(temp);
       // For calculate the spaces for direction scrolling.
-      const unsigned int xoffset = E.offsetx >= stringlen ? stringlen : E.offsetx;
+      const unsigned int xoffset = E.offset_x >= stringlen ? stringlen : E.offset_x;
       temp += xoffset;
       // Calculate the correct display length of the buffer
       unsigned int bufferlen = stringlen - xoffset; // same as strlen(temp)
-      bufferlen = (bufferlen >= E.screencols - E.leftMarginSize) ? 
-        E.screencols - E.leftMarginSize : bufferlen;
+      bufferlen = (bufferlen >= E.screen_cols - E.left_margin_size) ? 
+        E.screen_cols - E.left_margin_size : bufferlen;
       // ab_append(abptr, " ", 1);  // The space before the Line.
       ab_append(abptr, temp, bufferlen);
     }
-		if (nrows<E.screenrows - 1) ab_append(abptr, "\r\n", 2);
+		if (nrows<E.screen_rows - 1) ab_append(abptr, "\r\n", 2);
   }
 }
 
@@ -313,27 +313,27 @@ void editor_refresh_screen(void) {
 }
 
 void editor_scroll_down(void) {
-    E.offsety++;
+    E.offset_y++;
 }
 
 void editor_scroll_up(void) {
-  	E.offsety--;
+  	E.offset_y--;
 }
 
 void editor_scroll_left(void) {
-  E.offsetx--;
+  E.offset_x--;
 }
 
 void editor_scroll_right(void) {
-  E.offsetx++;
+  E.offset_x++;
 }
 
 void editor_cursor_x_to_textbuf_pos(unsigned int x){
-	E.cursorTextbufPosX = x;
+	E.cursor_textbuf_pos_x = x;
 }
 
 void editor_cursor_y_to_textbuf_pos(unsigned int y){
-	E.cursorTextbufPosY = y;
+	E.cursor_textbuf_pos_y = y;
 }
 
 void editor_move_cursor_to_end_of_line(textbuf * txb, unsigned int y){
@@ -362,17 +362,17 @@ int editor_move_cursor(int key) {
   switch (key) {
   case KEY_ARROW_UP: 
   case KEY_PAGE_UP:
-    if (E.cursorTextbufPosY > 0) {
-      if (editor_get_cursor_screen_pos_y() <= 0) --E.offsety;
-      E.cursorTextbufPosY--;
+    if (E.cursor_textbuf_pos_y > 0) {
+      if (editor_get_cursor_screen_pos_y() <= 0) --E.offset_y;
+      E.cursor_textbuf_pos_y--;
     }
     break;
   case KEY_ARROW_DOWN:
   case KEY_PAGE_DOWN:
-    if (E.cursorTextbufPosY < TEXTBUF.size - 1){
+    if (E.cursor_textbuf_pos_y < TEXTBUF.size - 1){
       // screenPos counts from 0, screen rows counts from 1
-      if (editor_get_cursor_screen_pos_y() >= E.screenrows-1) ++E.offsety;
-      E.cursorTextbufPosY++;
+      if (editor_get_cursor_screen_pos_y() >= E.screen_rows-1) ++E.offset_y;
+      E.cursor_textbuf_pos_y ++;
     }
     break;
   case KEY_ARROW_LEFT: 
@@ -402,7 +402,7 @@ int editor_move_cursor(int key) {
 // Set editorConfig.leftMarginSize according to 
 // the digits of the maxium line number stored in textbuf
 // The minimum size of leftMarginSize is 4
-void editor_set_margin_size(struct editorConfig *ptr,textbuf *ptrtb){
+void editor_set_margin_size(struct editor_config *ptr,textbuf *ptrtb){
   int NumberOflines = ptrtb->size; 
   int counter;
   // Find out the digits of greatest linenumber

@@ -73,7 +73,7 @@ void textbuf_enter(textbuf *, unsigned int, unsigned int);
 int textbuf_delete_line(textbuf *, unsigned int);
 int textbuf_delete_line_break(textbuf *, unsigned int);
 
-struct editorConfig {
+struct editor_config {
   unsigned int cx, cy;     // cursor position. cx horizontal, cy vertical
   // unsigned int cspx, cspy; // cursor screen position. cx horizontal, cy vertical
   // TODO: set cursor_textbuf_pos_x, cursor_textbuf_pos_y to be int; they are not unsigned int
