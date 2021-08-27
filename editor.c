@@ -377,15 +377,15 @@ int editor_move_cursor(int key) {
     break;
   case KEY_ARROW_LEFT: 
     // E.cursorTextbufPosX is unsigned int
-    if (E.cursorTextbufPosX > 0) 
-      E.cursorTextbufPosX--;
+    if (E.cursor_textbuf_pos_x > 0) 
+      E.cursor_textbuf_pos_x--;
     break;
   case KEY_ARROW_RIGHT: 
     if (editor_cursor_movable_to_right(&TEXTBUF,
         editor_get_cursor_textbuf_pos_x(),
         editor_get_cursor_textbuf_pos_y())
       )
-      E.cursorTextbufPosX++;
+      E.cursor_textbuf_pos_x++;
     break;
   default:
     return -1;
@@ -410,25 +410,25 @@ void editor_set_margin_size(struct editor_config *ptr,textbuf *ptrtb){
   // One more space for padding ' '
   counter++;
   counter = (counter >= 4) ? counter : 4;
-  ptr->leftMarginSize = counter;
+  ptr->left_margin_size = counter;
   return;
 }
 
 
 int editor_get_cursor_screen_pos_x(void){
-  return E.cursorTextbufPosX + E.leftMarginSize - E.offsetx; 
+  return E.cursor_textbuf_pos_x + E.left_margin_size - E.offset_x; 
 }
 
 int editor_get_cursor_screen_pos_y(void){
-  return E.cursorTextbufPosY - E.offsety;
+  return E.cursor_textbuf_pos_y - E.offset_y;
 }
 
 int editor_get_cursor_textbuf_pos_x(void){
-  return E.cursorTextbufPosX;
+  return E.cursor_textbuf_pos_x;
 }
 
 int editor_get_cursor_textbuf_pos_y(void){
-  return E.cursorTextbufPosY;
+  return E.cursor_textbuf_pos_y;
 }
 
 // See if the cursor can be moved further to write 
