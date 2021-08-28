@@ -115,7 +115,8 @@ void textbuf_enter(textbuf *ptrtb, unsigned int x, unsigned int y) {
 
 int textbuf_delete_line(textbuf *ptrtb, unsigned int y) {
   free(ptrtb->linebuf[y]);
-  memmove(&(ptrtb->linebuf[y]), &(ptrtb->linebuf[y + 1]), (ptrtb->size - y - 1) * sizeof(char *));
+  memmove(&(ptrtb->linebuf[y]), &(ptrtb->linebuf[y + 1]),
+          (ptrtb->size - y - 1) * sizeof(char *));
   ptrtb->linebuf = realloc(ptrtb->linebuf, (ptrtb->size - 1));
   ptrtb->size--;
   return 1;
@@ -128,7 +129,8 @@ int textbuf_delete_line_break(textbuf *t, unsigned int y) {
   memcpy(&(t->linebuf[y - 1][len_upper]), t->linebuf[y], len_lower);
   t->linebuf[y - 1][len_lower + len_upper] = '\0';
   free(t->linebuf[y]);
-  memmove(&(t->linebuf[y]), &(t->linebuf[y + 1]), (t->size - y - 1) * sizeof(char *));
+  memmove(&(t->linebuf[y]), &(t->linebuf[y + 1]),
+          (t->size - y - 1) * sizeof(char *));
   t->linebuf = realloc(t->linebuf, (t->size - 1));
   t->size--;
   editor_move_cursor(KEY_ARROW_UP);

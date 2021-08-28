@@ -7,6 +7,7 @@ COPTIMISING=-O0 -ggdb3 -fno-omit-frame-pointer -ffloat-store -fno-common -fstric
 CFLAGS=-std=c11 $(CWARNINGS) $(COPTIMISING) -lm
 
 INSTALL_DIR=$(HOME)/.aurum/bin
+SRCS=main.c utils.c terminal.c globals.c editor.c utils.h terminal.h globals.h editor.h
 
 
 RED=\033[0;31m
@@ -48,6 +49,9 @@ editor.o: editor.h editor.c globals.o utils.o
 
 clean:
 	rm -f editor.o terminal.o utils.o main.o globals.o aurum
+
+fmt:
+	clang-format -i $(SRCS)
 
 install: build
 	echo "installing aurum..."

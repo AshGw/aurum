@@ -1,10 +1,10 @@
 #ifndef EDITOR_H
 #define EDITOR_H 1
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
 
 int editor_read_key(void);
 int editor_process_key_press(void);

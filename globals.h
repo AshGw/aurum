@@ -2,7 +2,7 @@
 #define GLOBALS_H 1
 
 #ifndef CTRL_KEY
-#define CTRL_KEY(k) ((k) & 0x1f)
+#define CTRL_KEY(k) ((k)&0x1f)
 #endif
 
 #define KILO_VERSION_MAJOR 0
@@ -74,10 +74,13 @@ int textbuf_delete_line(textbuf *, unsigned int);
 int textbuf_delete_line_break(textbuf *, unsigned int);
 
 struct editor_config {
-  unsigned int cx, cy;     // cursor position. cx horizontal, cy vertical
-  // unsigned int cspx, cspy; // cursor screen position. cx horizontal, cy vertical
-  // TODO: set cursor_textbuf_pos_x, cursor_textbuf_pos_y to be int; they are not unsigned int
-  unsigned int cursor_textbuf_pos_x, cursor_textbuf_pos_y; // Cursor textbuf position
+  unsigned int cx, cy; // cursor position. cx horizontal, cy vertical
+  // unsigned int cspx, cspy; // cursor screen position. cx horizontal, cy
+  // vertical
+  // TODO: set cursor_textbuf_pos_x, cursor_textbuf_pos_y to be int; they are
+  // not unsigned int
+  unsigned int cursor_textbuf_pos_x,
+      cursor_textbuf_pos_y; // Cursor textbuf position
   unsigned int screen_rows; // number of rows that fit in the screen
   unsigned int screen_cols; // number of columns that fit in the screen
   unsigned int offset_x;    // Display offset, x direction

@@ -1,6 +1,6 @@
 #include "terminal.h"
-#include "utils.h"
 #include "globals.h"
+#include "utils.h"
 
 extern struct editor_config E;
 
@@ -42,8 +42,8 @@ void get_window_size(unsigned int *rows, unsigned int *cols) {
   // place the data into ws struct, return -1 on failure
   if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
     if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12) {
-      // ESC 999C move cursor to the right, B move down; They would not move cursor
-      // off-screen.
+      // ESC 999C move cursor to the right, B move down; They would not move
+      // cursor off-screen.
       die("Fail to get window size! (At func get_window_size(), fail to write "
           "Escape Sequence");
     }
@@ -57,19 +57,19 @@ void get_window_size(unsigned int *rows, unsigned int *cols) {
 void enable_raw_mode(void) {
   struct termios raw;
   if (tcgetattr(STDIN_FILENO, &raw) == -1) {
-		// STDIN_FILENO is the standard input
+    // STDIN_FILENO is the standard input
     die("tcgetattr");
-	}
+  }
   if (tcgetattr(STDIN_FILENO, &E.orig_termios) == -1) {
     die("tcgetattr");
   }
   atexit(&disable_raw_mode); // From <stdlib.h> Execute the function when the
-                           // program exits.
-	
-	// See devel.md for what do these flags do.
-	raw.c_lflag &= ~(ECHO|ICANON|ISIG|IEXTEN);
-	raw.c_iflag &= ~(IXON|ICRNL|BRKINT|INPCK|ISTRIP);
-  raw.c_oflag &= ~(OPOST); 
+                             // program exits.
+
+  // See devel.md for what do these flags do.
+  raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
+  raw.c_iflag &= ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP);
+  raw.c_oflag &= ~(OPOST);
   raw.c_cflag &= ~(CS8);
 
   raw.c_cc[VMIN] = 0;  // what read() returns after timeout
@@ -80,23 +80,23 @@ void enable_raw_mode(void) {
   }
 }
 
-void disable_raw_mode(void) {	
-	// Check if the original terminal mode is normal mode
-	// if so, restore it
-	if ((E.orig_termios.c_lflag | ECHO) == E.orig_termios.c_lflag){
-		tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios);
-		return;
-	}
+void disable_raw_mode(void) {
+  // Check if the original terminal mode is normal mode
+  // if so, restore it
+  if ((E.orig_termios.c_lflag | ECHO) == E.orig_termios.c_lflag) {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios);
+    return;
+  }
 
-	// If not, restore to normal mode
+  // If not, restore to normal mode
   struct termios raw;
   if (tcgetattr(STDIN_FILENO, &raw) == -1) {
-		// STDIN_FILENO is the standard input
+    // STDIN_FILENO is the standard input
     die("tcgetattr");
-	}
-	raw.c_lflag |= (ECHO|ICANON|ISIG|IEXTEN);
-	raw.c_iflag |= (IXON|ICRNL|BRKINT|INPCK|ISTRIP);
-  raw.c_oflag |= (OPOST); 
+  }
+  raw.c_lflag |= (ECHO | ICANON | ISIG | IEXTEN);
+  raw.c_iflag |= (IXON | ICRNL | BRKINT | INPCK | ISTRIP);
+  raw.c_oflag |= (OPOST);
   raw.c_cflag |= (CS8);
 
   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
