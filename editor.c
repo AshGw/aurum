@@ -8,8 +8,6 @@ extern struct key KEY;
 extern struct debug_util DEB;
 extern textbuf TEXTBUF;
 
-/*** FILE IO ***/
-// Change to open() syscall
 void editor_open(const char *filename) {
   FILE *fp = fopen(filename, "ab+");
   if (!fp) {
@@ -19,27 +17,24 @@ void editor_open(const char *filename) {
     die(errorMessage);
   }
 
-  textbuf_read(&TEXTBUF, fp); // All lines of the file are read into TEXTBUF
+  textbuf_read(&TEXTBUF, fp);
   fclose(fp);
   if (TEXTBUF.size == 0) {
     textbuf_init_for_empty_file(&TEXTBUF);
   }
 }
 
-/*** Input ***/
-/// Reads and returns the key once.
 int editor_read_key(void) {
   char c;
   int nread = read(STDIN_FILENO, &c, 1);
-  // read returns '\0' if no input is received after 0.1 s
-  // read returns number of byte read. -1 when failure.
+
   if (nread == -1 && errno != EAGAIN)
     return -1;
 
   if (!nread)
     return 0;
 
-  // Test if it is a normal keypress
+
   PU.updated = 1;
   if (c != '\x1b') {
     KEY.key[0] = c;
@@ -54,9 +49,6 @@ int editor_read_key(void) {
   if (seq[0] != '[')
     return '\x1b';
 
-  // `DELETE`: \x1b[3~
-  // `PAGE_UP`: \x1b[5~
-  // `PAGE_DOWN`: \x1b[6~
   switch (seq[1]) {
   case '5':
   case '6':
@@ -116,7 +108,6 @@ int editor_process_key_press(void) {
   case 13: // Enter key, or ctrl('m')
     textbuf_enter(&TEXTBUF, textbufXPos, textbufYPos);
     E.cursor_textbuf_pos_x = 0;
-    // Scroll down when enter is used in last line of the screen
     // TODO: REFACTOR
     editor_move_cursor(KEY_ARROW_DOWN);
     break;

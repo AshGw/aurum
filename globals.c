@@ -3,9 +3,9 @@
 #include "utils.h"
 
 struct editor_config E;
-struct programUtils PU;
+struct program_utils PU;
 struct key KEY;
-struct debugUtil DEB;
+struct debug_util DEB;
 textbuf TEXTBUF;
 
 void textbuf_init(textbuf *t) {
@@ -169,6 +169,6 @@ int debug_util_init(struct debug_util *d) {
 /// The string must be null terminated
 // replace strlen if possible
 int debug_add_message(struct debug_util *d, const char *string) {
-  abAppend(d->debug_string, string, strnlen_s(string, 256));
+  ab_append(d->debug_string, string, strnlen_s(string, 256));
   return 1;
 }

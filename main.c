@@ -5,8 +5,8 @@
 #include "terminal.h"
 #include "utils.h"
 
-extern struct editorConfig E;
-extern struct programUtils PU;
+extern struct editor_config E;
+extern struct program_utils PU;
 extern struct key KEY;
 extern struct debugUtil DEB;
 extern textbuf TEXTBUF;
@@ -19,7 +19,7 @@ void init(void) {
   E.offset_x = 0;
   E.mode = 1; // 1 insert mode
   E.left_margin_size = 3;
-  get_window_size(&E.screenrows, &E.screencols); // from "terminal.h"
+  get_window_size(&E.screen_rows, &E.screen_cols); // from "terminal.h"
 
   program_utils_init(&PU);
   textbuf_init(&TEXTBUF);
