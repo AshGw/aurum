@@ -6,8 +6,8 @@
 #include <errno.h>
 #include <termios.h>
 
-int getCursorPosition(unsigned int *, unsigned int *);
-void getWindowSize(unsigned int *, unsigned int *);
-void enableRAWMode(void);
-void disableRAWMode(void);
-#endif //For TERMINAL_H
+int get_cursor_position(unsigned int *, unsigned int *);
+void get_window_size(unsigned int *, unsigned int *);
+void enable_raw_mode(void);
+void disable_raw_mode(void);
+#endif // For TERMINAL_H
