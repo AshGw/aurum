@@ -1,174 +1,118 @@
-#include "editor.h"
-#include "globals.h"
+#ifndef GLOBALS_H
+#define GLOBALS_H 1
+
+#ifndef CTRL_KEY
+#define CTRL_KEY(k) ((k)&0x1f)
+#endif
+
+#define KILO_VERSION_MAJOR 0
+#define KILO_VERSION_MINOR 0
+#define KILO_VERSION_PATCH 1
+
+// Key values
+
+#ifndef KEY_ARROW_UP
+#define KEY_ARROW_UP 1065
+#endif
+
+#ifndef KEY_ARROW_DOWN
+#define KEY_ARROW_DOWN 1066
+#endif
+
+#ifndef KEY_ARROW_LEFT
+#define KEY_ARROW_LEFT 1067
+#endif
+
+#ifndef KEY_ARROW_RIGHT
+#define KEY_ARROW_RIGHT 1068
+#endif
+
+#ifndef KEY_PAGE_UP
+#define KEY_PAGE_UP 1053
+#endif
+
+#ifndef KEY_PAGE_DOWN
+#define KEY_PAGE_DOWN 1054
+#endif
+
+#ifndef KEY_DELETE
+#define KEY_DELETE 1051
+#endif
+
+#ifndef KEY_END
+#define KEY_END 1070
+#endif
+
+#ifndef KEY_HOME
+#define KEY_HOME 1072
+#endif
+
 #include "utils.h"
+#include <termios.h>
 
-struct editorConfig E;
-struct programUtils PU;
-struct key KEY;
-struct debugUtil DEB;
-textbuf TEXTBUF;
+typedef struct textbuf {
+  // TODO: Change size to numlines
+  unsigned int size; // Total number of lines
+  char **linebuf;    // A pointer storing pointer to line buffer
+  int *lineLength;   // lineLength[n] = strlen(linebuf[n])
+} textbuf;           // textbuffer holding all lines.
 
-void textbufInit(textbuf *t) {
-  t->size = 0;
-  t->linebuf = NULL;
-  if (t->size != 0 || t->linebuf != NULL)
-    die("Failed to Init Textbuf!");
-}
+#include <stddef.h>
+void textbufInit(textbuf *);
+unsigned int textbufGetNthLineLength(textbuf *, int);
 
-unsigned int textbufGetNthLineLength(textbuf *t, int y) {
-  return strnlen_s(t->linebuf[y], 4096);
-}
+#include <stdio.h>
+int textbufRead(textbuf *, FILE *);
 
-#include <string.h>
-static int addtextbuf(textbuf *ptrtb, char *string) {
-  (ptrtb->size)++;
-  int stringLength = strlen(string);
-  ptrtb->linebuf =
-      (char **)realloc(ptrtb->linebuf, (ptrtb->size) * sizeof(char *));
-  // ptrtb->linebuf = ptrbuf;
-  (ptrtb->linebuf)[ptrtb->size - 1] = (char *)calloc(stringLength, 1);
-  memcpy((ptrtb->linebuf)[ptrtb->size - 1], string,
-         stringLength - 1); // ignore '\n', which is read by getline()
-  (ptrtb->linebuf)[ptrtb->size - 1][stringLength - 1] = '\0';
-  return 1;
-}
+int textbufInitForEmptyFile(textbuf *);
+void textbufInputChar(textbuf *, char, int, int);
+void textbufDeleteChar(textbuf *, int, int);
+void textbufEnter(textbuf *, unsigned int, unsigned int);
+int textbufDeleteLine(textbuf *, unsigned int);
+int textbufDeleteLineBreak(textbuf *, unsigned int);
 
-int textbufRead(textbuf *tb, FILE *fp) {
-  char *buf;
-  size_t size;
+struct editorConfig {
+  unsigned int cx, cy; // cursor position. cx horizantol, cy vertical
+  // unsigned int cspx, cspy; // cursor screen position. cx horizantol, cy
+  // vertical
+  // TODO: set cursorTextbufPosX, cursorTextbufPosY to be int; they are not
+  // unsigned int
+  unsigned int cursorTextbufPosX, cursorTextbufPosY; // Cursor textbuf position
+  unsigned int screenrows; // number of rows that fit in the screen
+  unsigned int screencols; // number of columns that fit in the screen
+  unsigned int offsetx;    // Display offset, x direction
+  unsigned int offsety;
+  unsigned int mode; // Indicator for mode
+  unsigned int leftMarginSize;
+  struct abuf fileName;
+  struct termios orig_termios;
+};
 
-  buf = NULL;
-  size = 0;
-  while (getline(&buf, &size, fp) >= 1) {
-    addtextbuf(tb, buf);
-    free(buf);
-    buf = NULL;
-    size = 0;
-  }
-  return 1;
-}
+struct programUtils {
+  unsigned int running;
+  unsigned int updated;
+};
 
-int textbufInitForEmptyFile(textbuf *t) {
-  t->linebuf = (char **)calloc(1, sizeof(char *));
-  t->linebuf[0] = (char *)calloc(1, sizeof(char *));
-  t->linebuf[0][0] = '\0';
-  t->size = 1;
-  return 1;
-}
+void programUtilsInit(struct programUtils *);
 
-void textbufInputChar(textbuf *ptrtb, char inputChar, int x, int y) {
-  char *linebuf = ptrtb->linebuf[y];
-  int len = strlen(linebuf);
-  if (x <= len && x >= 0) {
-    // strlen does not count the final null terminator.
-    linebuf = realloc(linebuf, len + 2); // extra space for null terminator
-    // memmove: <string.h>, c11
-    // memmove(dest, src, n)
-    // This is the index:
-    // 0, 1, 2, ... , x, x+1, ... len
-    // there are 'x' elements from 0 to x,
-    // 'len-x' element from x to the end of array
-    memmove(&linebuf[x + 1], &linebuf[x], (len - x) * sizeof(char));
-    linebuf[x] = inputChar; // Assign Character
-    linebuf[len + 1] = '\0';
-    ptrtb->linebuf[y] = linebuf;
-  }
-}
+///  The key struct can hold upto 8 keys
+///  If the key value is smaller
+/// than 1000, it represents the key corresponding to the ASCII code
+/// key value of 1000 - 2000 representes escaped key
+/// note 'ctrl(a)' = 'a' - 96 = 1
+struct key {
+  unsigned int key[8];
+};
 
-// it deletes the x th char in the yth row
-// Counting from 0th
-void textbufDeleteChar(textbuf *ptrtb, int x, int y) {
-  char *linebuf = ptrtb->linebuf[y];
-  int len = strnlen_s(linebuf, 1024);
-  // the left padding length shall be included
-  // needs to take account of the null Character
-  if (x < len && x >= 0) {
-    linebuf = realloc(linebuf, len + 2); // extra space for null terminator
-    memmove(&linebuf[x], &linebuf[x + 1], (len - x) * sizeof(char));
-    linebuf = realloc(linebuf, len); // extra space for null terminator
-    ptrtb->linebuf[y] = linebuf;
-  }
-}
+int keyInit(struct key *);
+int keyRefresh(struct key *);
 
-void textbufEnter(textbuf *ptrtb, unsigned int x, unsigned int y) {
-  // Input: pointer to textbuf, TEXTBUFPosX, TEXTBUFPosY
-  const unsigned int len = ptrtb->size;
-  if (y < len) {
-    ptrtb->size++;
-    char **linebuf = ptrtb->linebuf;
-    linebuf = realloc(linebuf, (len + 1) * sizeof(char *));
-    ptrtb->linebuf = linebuf; // in case of realloc changed the pointer
-    memmove(&linebuf[y + 1], &linebuf[y], (len - y) * sizeof(char *));
-    // calloc is required to create a new pointer with allocated space
-    linebuf[y] = (char *)calloc(1 + x, sizeof(char));
-    // Modify the line above
-    memcpy(linebuf[y], linebuf[y + 1], x * sizeof(char));
-    linebuf[y][x] = '\0';
-    // Modify the line below
-    const unsigned int strLength = strlen(linebuf[y + 1]);
-    memmove(linebuf[y + 1], linebuf[y + 1] + x, strLength - x);
-    linebuf[y + 1][strLength - x] = '\0';
-    linebuf[y + 1] = realloc(linebuf[y + 1], strLength - x + 1);
-    ptrtb->linebuf = linebuf;
-  }
-}
+struct debugUtil {
+  struct abuf *debugString;
+};
 
-int textbufDeleteLine(textbuf *ptrtb, unsigned int y) {
-  free(ptrtb->linebuf[y]);
-  memmove(&(ptrtb->linebuf[y]), &(ptrtb->linebuf[y + 1]),
-          (ptrtb->size - y - 1) * sizeof(char *));
-  ptrtb->linebuf = realloc(ptrtb->linebuf, (ptrtb->size - 1));
-  ptrtb->size--;
-  return 1;
-}
+int debugUtilInit(struct debugUtil *);
+// The string must be null terminated
+int debugAddMessage(struct debugUtil *, const char *);
 
-int textbufDeleteLineBreak(textbuf *t, unsigned int y) {
-  const int lenLower = strlen(t->linebuf[y]);
-  const int lenUpper = strlen(t->linebuf[y - 1]);
-  t->linebuf[y - 1] = realloc(t->linebuf[y - 1], lenLower + lenUpper + 1);
-  memcpy(&(t->linebuf[y - 1][lenUpper]), t->linebuf[y], lenLower);
-  t->linebuf[y - 1][lenLower + lenUpper] = '\0';
-  free(t->linebuf[y]);
-  memmove(&(t->linebuf[y]), &(t->linebuf[y + 1]),
-          (t->size - y - 1) * sizeof(char *));
-  t->linebuf = realloc(t->linebuf, (t->size - 1));
-  t->size--;
-  editorMoveCursor(KEY_ARROW_UP);
-  editorCursorXToTextbufPos(lenUpper);
-  return 1;
-}
-
-int keyInit(struct key *K) {
-  K->key[0] = 0;
-  if (K->key[0] != 0)
-    return -1;
-  return 0;
-}
-
-int keyRefresh(struct key *K) {
-  for (int i = 0; i < 8; i++) {
-    K->key[i] = 0;
-    if (K->key[i] != 0)
-      return -1;
-  }
-  return 0;
-}
-
-void programUtilsInit(struct programUtils *p) {
-  p->running = 1;
-  p->updated = 1;
-}
-
-int debugUtilInit(struct debugUtil *d) {
-  d->debugString = (struct abuf *)malloc(sizeof(struct abuf));
-  d->debugString->len = 0;
-  d->debugString->b = NULL;
-  return 1;
-}
-
-/// The string must be null terminated
-// replace strlen if possible
-int debugAddMessage(struct debugUtil *d, const char *string) {
-  abAppend(d->debugString, string, strnlen_s(string, 256));
-  return 1;
-}
+#endif // for GLOBALS_H
