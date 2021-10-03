@@ -1,9 +1,7 @@
 #include "utils.h"
 
 // A function for debug
-void tracker(void){
-  return;
-}
+void tracker(void) { return; }
 
 void clearScreen(void) {
   write(STDIN_FILENO, "\x1b[2J",
@@ -21,18 +19,18 @@ void die(const char *s) {
   exit(1); // Exit with 1. From <stdlib.h>
 }
 
-
-#ifndef _POSIX_C_SOURCE 
+#ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 0
 #endif
 
-#if !_POSIX_C_SOURCE >= 200809L || ! defined _GNU_SOURCE 
+#if !_POSIX_C_SOURCE >= 200809L || !defined _GNU_SOURCE
 // My own implementation of strnlen_s()
 // return the number of the byte pointed to by s, excluding '\0'
 // but at most len
-size_t strnlen_s(const char *s, size_t maxlen){
+size_t strnlen_s(const char *s, size_t maxlen) {
   size_t res;
-  for (res = 0; *(s+res)!='\0' && res <= maxlen; res++);
+  for (res = 0; *(s + res) != '\0' && res <= maxlen; res++)
+    ;
   return res;
 }
 #endif
@@ -47,10 +45,10 @@ void abAppend(struct abuf *ab, const char *s, int len) {
   ab->len += len;
 }
 
-void abFree(struct abuf *ab) { 
-	free(ab->b); 
-	ab->b = NULL;
-	ab->len = 0;
+void abFree(struct abuf *ab) {
+  free(ab->b);
+  ab->b = NULL;
+  ab->len = 0;
 }
 #endif
 
@@ -61,11 +59,11 @@ void abFree(struct abuf *ab) {
 //     _POSIX_C_SOURCE >= 200809L
 // Before glibc 2.10:
 //     _GNU_SOURCE
-#ifndef _POSIX_C_SOURCE 
+#ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 0
 #endif
 
-#if !_POSIX_C_SOURCE >= 200809L || ! defined _GNU_SOURCE 
+#if !_POSIX_C_SOURCE >= 200809L || !defined _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
