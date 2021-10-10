@@ -1,9 +1,9 @@
 // #include <pthread.h>
 
-#include "editor.h"
 #include "globals.h"
 #include "terminal.h"
 #include "utils.h"
+#include "editor.h"
 
 extern struct editorConfig E;
 extern struct programUtils PU;
@@ -17,14 +17,14 @@ void init(void) {
   E.cursorTextbufPosY = 0;
   E.offsety = 0;
   E.offsetx = 0;
-  E.mode = 1; // 1 insert mode
+	E.mode = 1; // 1 insert mode
   E.leftMarginSize = 3;
   getWindowSize(&E.screenrows, &E.screencols); // from "terminal.h"
-
-  programUtilsInit(&PU);
-  textbufInit(&TEXTBUF);
-  keyInit(&KEY);
-  debugUtilInit(&DEB);
+	
+	programUtilsInit(&PU);
+	textbufInit(&TEXTBUF);
+	keyInit(&KEY);
+	debugUtilInit(&DEB);
 
   enableRAWMode(); // from "terminal.h"; enable Terminal RAW mode
 }
@@ -34,8 +34,8 @@ int main(int argc, char *argv[], char *envp[]) {
   init();
   if (argc > 1) {
     editorOpen(argv[1]);
-    abAppend(&E.fileName, argv[1], strnlen_s(argv[1], 256));
-  }
+    abAppend(&E.fileName, argv[1], strnlen_s(argv[1], 256)); 
+  } 
   if (argc <= 1) {
     editorOpen("aaa.txt");
   }
@@ -45,7 +45,7 @@ int main(int argc, char *argv[], char *envp[]) {
     if (editorReadKey() == -1)
       die("editorReadKey Failed");
     if (PU.updated) {
-      if (KEY.key[0]) {
+      if (KEY.key[0]){
         // Incase the margine size changes
         editorSetMarginSize(&E, &TEXTBUF);
         editorProcessKeyPress();
@@ -58,10 +58,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
   if (argc > 1) {
     editorSaveFile(argv[1]);
-  }
-  if (argc <= 1) {
-    editorSaveFile("savedTo.txt");
-  }
-  clearScreen();
+  } 
+	if (argc <= 1) {
+		editorSaveFile("savedTo.txt");
+	}
+	clearScreen();
   return 0;
-}
+} 

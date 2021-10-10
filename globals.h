@@ -54,8 +54,9 @@ typedef struct textbuf {
   // TODO: Change size to numlines
   unsigned int size; // Total number of lines
   char **linebuf;    // A pointer storing pointer to line buffer
-  int *lineLength;   // lineLength[n] = strlen(linebuf[n])
+  int *lineLength;  // lineLength[n] = strlen(linebuf[n])
 } textbuf;           // textbuffer holding all lines.
+
 
 #include <stddef.h>
 void textbufInit(textbuf *);
@@ -72,11 +73,9 @@ int textbufDeleteLine(textbuf *, unsigned int);
 int textbufDeleteLineBreak(textbuf *, unsigned int);
 
 struct editorConfig {
-  unsigned int cx, cy; // cursor position. cx horizantol, cy vertical
-  // unsigned int cspx, cspy; // cursor screen position. cx horizantol, cy
-  // vertical
-  // TODO: set cursorTextbufPosX, cursorTextbufPosY to be int; they are not
-  // unsigned int
+  unsigned int cx, cy;     // cursor position. cx horizantol, cy vertical
+  // unsigned int cspx, cspy; // cursor screen position. cx horizantol, cy vertical
+  // TODO: set cursorTextbufPosX, cursorTextbufPosY to be int; they are not unsigned int
   unsigned int cursorTextbufPosX, cursorTextbufPosY; // Cursor textbuf position
   unsigned int screenrows; // number of rows that fit in the screen
   unsigned int screencols; // number of columns that fit in the screen
@@ -107,12 +106,12 @@ struct key {
 int keyInit(struct key *);
 int keyRefresh(struct key *);
 
-struct debugUtil {
-  struct abuf *debugString;
+struct debugUtil{
+	struct abuf *debugString;
 };
 
-int debugUtilInit(struct debugUtil *);
-// The string must be null terminated
-int debugAddMessage(struct debugUtil *, const char *);
+int debugUtilInit(struct debugUtil*);
+// The string must be null terminated 
+int debugAddMessage(struct debugUtil*, const char*); 
 
 #endif // for GLOBALS_H
