@@ -15,8 +15,8 @@ void textbufInit(textbuf *t) {
     die("Failed to Init Textbuf!");
 }
 
-unsigned int textbufGetNthLineLength(textbuf *t, int y){
-	return strnlen_s(t->linebuf[y], 4096);
+unsigned int textbufGetNthLineLength(textbuf *t, int y) {
+  return strnlen_s(t->linebuf[y], 4096);
 }
 
 #include <string.h>
@@ -48,12 +48,12 @@ int textbufRead(textbuf *tb, FILE *fp) {
   return 1;
 }
 
-int textbufInitForEmptyFile(textbuf *t){
-	t->linebuf = (char **) calloc(1, sizeof(char*));
-	t->linebuf[0] = (char *) calloc(1, sizeof(char*));
-	t->linebuf[0][0] = '\0';
-	t->size = 1;
-	return 1;
+int textbufInitForEmptyFile(textbuf *t) {
+  t->linebuf = (char **)calloc(1, sizeof(char *));
+  t->linebuf[0] = (char *)calloc(1, sizeof(char *));
+  t->linebuf[0][0] = '\0';
+  t->size = 1;
+  return 1;
 }
 
 void textbufInputChar(textbuf *ptrtb, char inputChar, int x, int y) {
@@ -91,7 +91,7 @@ void textbufDeleteChar(textbuf *ptrtb, int x, int y) {
 }
 
 void textbufEnter(textbuf *ptrtb, unsigned int x, unsigned int y) {
-// Input: pointer to textbuf, TEXTBUFPosX, TEXTBUFPosY
+  // Input: pointer to textbuf, TEXTBUFPosX, TEXTBUFPosY
   const unsigned int len = ptrtb->size;
   if (y < len) {
     ptrtb->size++;
@@ -109,46 +109,49 @@ void textbufEnter(textbuf *ptrtb, unsigned int x, unsigned int y) {
     memmove(linebuf[y + 1], linebuf[y + 1] + x, strLength - x);
     linebuf[y + 1][strLength - x] = '\0';
     linebuf[y + 1] = realloc(linebuf[y + 1], strLength - x + 1);
-		ptrtb->linebuf = linebuf;
+    ptrtb->linebuf = linebuf;
   }
 }
 
-int textbufDeleteLine(textbuf *ptrtb, unsigned int y){
-	free(ptrtb->linebuf[y]);
-	memmove(&(ptrtb->linebuf[y]), &(ptrtb->linebuf[y+1]), (ptrtb->size - y - 1) * sizeof(char *));
-	ptrtb->linebuf = realloc(ptrtb->linebuf, (ptrtb->size - 1));
-	ptrtb->size--;
-	return 1;
+int textbufDeleteLine(textbuf *ptrtb, unsigned int y) {
+  free(ptrtb->linebuf[y]);
+  memmove(&(ptrtb->linebuf[y]), &(ptrtb->linebuf[y + 1]),
+          (ptrtb->size - y - 1) * sizeof(char *));
+  ptrtb->linebuf = realloc(ptrtb->linebuf, (ptrtb->size - 1));
+  ptrtb->size--;
+  return 1;
 }
 
-int textbufDeleteLineBreak(textbuf *t, unsigned int y){
-	const int lenLower = strlen(t->linebuf[y]);
-	const int lenUpper = strlen(t->linebuf[y-1]);
-	t->linebuf[y-1] = realloc(t->linebuf[y-1], lenLower + lenUpper+1);	
-	memcpy(&(t->linebuf[y-1][lenUpper]), t->linebuf[y], lenLower);
-	t->linebuf[y-1][lenLower+lenUpper] = '\0';
-	free(t->linebuf[y]);
-	memmove(&(t->linebuf[y]), &(t->linebuf[y+1]), (t->size - y - 1) * sizeof(char *));
-	t->linebuf = realloc(t->linebuf, (t->size - 1));
-	t->size--;
-	editorMoveCursor(KEY_ARROW_UP);
-	editorCursorXToTextbufPos(lenUpper);
-	return 1;
+int textbufDeleteLineBreak(textbuf *t, unsigned int y) {
+  const int lenLower = strlen(t->linebuf[y]);
+  const int lenUpper = strlen(t->linebuf[y - 1]);
+  t->linebuf[y - 1] = realloc(t->linebuf[y - 1], lenLower + lenUpper + 1);
+  memcpy(&(t->linebuf[y - 1][lenUpper]), t->linebuf[y], lenLower);
+  t->linebuf[y - 1][lenLower + lenUpper] = '\0';
+  free(t->linebuf[y]);
+  memmove(&(t->linebuf[y]), &(t->linebuf[y + 1]),
+          (t->size - y - 1) * sizeof(char *));
+  t->linebuf = realloc(t->linebuf, (t->size - 1));
+  t->size--;
+  editorMoveCursor(KEY_ARROW_UP);
+  editorCursorXToTextbufPos(lenUpper);
+  return 1;
 }
 
 int keyInit(struct key *K) {
   K->key[0] = 0;
   if (K->key[0] != 0)
-		return -1;
-	return 0;
+    return -1;
+  return 0;
 }
 
-int keyRefresh(struct key *K){
-	for (int i = 0; i < 8; i++){
-		K->key[i] = 0;
-		if (K->key[i] != 0) return -1;
-	}
-	return 0;
+int keyRefresh(struct key *K) {
+  for (int i = 0; i < 8; i++) {
+    K->key[i] = 0;
+    if (K->key[i] != 0)
+      return -1;
+  }
+  return 0;
 }
 
 void programUtilsInit(struct programUtils *p) {
@@ -156,17 +159,16 @@ void programUtilsInit(struct programUtils *p) {
   p->updated = 1;
 }
 
-
-int debugUtilInit(struct debugUtil *d){
-	d->debugString = (struct abuf *)malloc(sizeof(struct abuf));
-	d->debugString->len = 0;
-	d->debugString->b = NULL;
-	return 1;
+int debugUtilInit(struct debugUtil *d) {
+  d->debugString = (struct abuf *)malloc(sizeof(struct abuf));
+  d->debugString->len = 0;
+  d->debugString->b = NULL;
+  return 1;
 }
 
-/// The string must be null terminated 
+/// The string must be null terminated
 // replace strlen if possible
-int debugAddMessage(struct debugUtil *d, const char *string){
-		abAppend(d->debugString, string, strnlen_s(string, 256));
-	return 1;
+int debugAddMessage(struct debugUtil *d, const char *string) {
+  abAppend(d->debugString, string, strnlen_s(string, 256));
+  return 1;
 }
