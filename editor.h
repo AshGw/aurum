@@ -1,6 +1,7 @@
 #ifndef EDITOR_H
 #define EDITOR_H 1
 
+#include "globals.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
