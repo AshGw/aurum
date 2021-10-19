@@ -9,7 +9,7 @@ CFLAGS=-std=c11 $(CWARNINGS) $(COPTIMISING) -lm
 INSTALL_DIR=$(HOME)/.aurum/bin
 SRCS=main.c utils.c terminal.c globals.c editor.c utils.h terminal.h globals.h editor.h
 
-
+GREEN=\033[0;32m
 RED=\033[0;31m
 BLUE=\033[0;34m
 NC=\033[0m
@@ -54,8 +54,8 @@ fmt:
 	clang-format -i $(SRCS)
 
 install: build
-	echo "installing aurum..."
-	sudo cp aurum /usr/local/bin/
-	sudo chmod +x /usr/local/bin/aurum
-	make clean
-
+	@echo -e "$(BLUE)Installing aurum..$(NC)"
+	@sudo cp aurum /usr/local/bin/
+	@sudo chmod +x /usr/local/bin/aurum
+	@make clean
+	@echo -e "$(GREEN)aurum was successfully installed$(NC)"
