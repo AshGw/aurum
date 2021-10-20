@@ -11,23 +11,7 @@ extern struct key KEY;
 extern struct debugUtil DEB;
 extern textbuf TEXTBUF;
 
-/*** init ***/
-void init(void) {
-  E.cursorTextbufPosX = 0;
-  E.cursorTextbufPosY = 0;
-  E.offsety = 0;
-  E.offsetx = 0;
-  E.mode = 1; // 1 insert mode
-  E.leftMarginSize = 3;
-  getWindowSize(&E.screenrows, &E.screencols); // from "terminal.h"
 
-  programUtilsInit(&PU);
-  textbufInit(&TEXTBUF);
-  keyInit(&KEY);
-  debugUtilInit(&DEB);
-
-  enableRAWMode(); // from "terminal.h"; enable Terminal RAW mode
-}
 
 int main(int argc, char *argv[], char *envp[]) {
   // TODO: Refactor Initialisation and reading file
@@ -64,4 +48,21 @@ int main(int argc, char *argv[], char *envp[]) {
   }
   clearScreen();
   return 0;
+}
+
+void init(void) {
+  E.cursorTextbufPosX = 0;
+  E.cursorTextbufPosY = 0;
+  E.offsety = 0;
+  E.offsetx = 0;
+  E.mode = 1; // 1 insert mode
+  E.leftMarginSize = 3;
+  getWindowSize(&E.screenrows, &E.screencols); // from "terminal.h"
+
+  programUtilsInit(&PU);
+  textbufInit(&TEXTBUF);
+  keyInit(&KEY);
+  debugUtilInit(&DEB);
+
+  enableRAWMode(); // from "terminal.h"; enable Terminal RAW mode
 }
