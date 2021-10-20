@@ -1,8 +1,8 @@
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include "utils.h"
 
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 0
@@ -51,8 +51,6 @@ void abFree(struct abuf *ab) {
   ab->len = 0;
 }
 #endif
-
-
 
 #if !_POSIX_C_SOURCE >= 200809L || !defined _GNU_SOURCE
 

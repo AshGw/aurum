@@ -11,8 +11,6 @@ extern struct key KEY;
 extern struct debugUtil DEB;
 extern textbuf TEXTBUF;
 
-
-
 int main(int argc, char *argv[], char *envp[]) {
   // TODO: Refactor Initialisation and reading file
   init();

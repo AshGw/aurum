@@ -1,16 +1,16 @@
 #ifndef UTILS_H
 #define UTILS_H 1
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <errno.h>
 
 void tracker(void);
 
 #ifndef ABUF_INIT
-#define ABUF_INIT \
+#define ABUF_INIT                                                              \
   { NULL, 0 }
 
 struct abuf {
