@@ -6,16 +6,16 @@ COPTIMISING=-O0 -ggdb3 -fno-omit-frame-pointer -ffloat-store -fno-common -fstric
 
 CFLAGS=-std=c11 $(CWARNINGS) $(COPTIMISING) -lm
 
-INSTALL_DIR=$(HOME)/psu/bin
+INSTALL_DIR=$(HOME)/.aurum/bin
 
-# Auxillary Variables
 
 RED=\033[0;31m
 BLUE=\033[0;34m
 NC=\033[0m
 
+all: install
 
-all: main.o 
+build: main.o 
 	@echo "--------------------------------------------------"
 	@echo -e "$(RED)LINKING$(NC): Producing Executable"
 	@$(CC) $(CFLAGS) main.o utils.o terminal.o globals.o editor.o -o aurum
@@ -48,3 +48,10 @@ editor.o: editor.h editor.c globals.o utils.o
 
 clean:
 	rm -f editor.o terminal.o utils.o main.o globals.o aurum
+
+install: build
+	echo "installing aurum..."
+	sudo cp aurum /usr/local/bin/
+	sudo chmod +x /usr/local/bin/aurum
+	make clean
+
